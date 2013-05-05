@@ -7,7 +7,7 @@ namespace _7.CalculateExpression
 {
     class Program
     {
-        // Метод за определяне на приоритета
+        //  Determining the precedence
         static int GetPrecedence(char oper)
         {
             switch (oper)
@@ -28,26 +28,25 @@ namespace _7.CalculateExpression
             return 0;
         }
 
-        // Метод за извършване на изчисленията
         static double CalculateExpression(char oper, Stack<double> exp)
         {
             double expression = 0;
             double lastNumber = exp.Pop();
             switch (oper)
             {
-                case 's': expression = Math.Sqrt(lastNumber); // изчислява корен квадратен
+                case 's': expression = Math.Sqrt(lastNumber); 
                     break;
-                case 'p': expression = Math.Pow(exp.Pop(), lastNumber); // изчислява повдигане на степен
+                case 'p': expression = Math.Pow(exp.Pop(), lastNumber);
                     break;
-                case 'l': expression = Math.Log(lastNumber); // изчислява логаритъм
+                case 'l': expression = Math.Log(lastNumber);
                     break;
-                case '*': expression = exp.Pop() * lastNumber; // умножение
+                case '*': expression = exp.Pop() * lastNumber;
                     break;
-                case '/': expression = exp.Pop() / lastNumber; // деление
+                case '/': expression = exp.Pop() / lastNumber;
                     break;
-                case '+': expression = exp.Pop() + lastNumber; // събиране
+                case '+': expression = exp.Pop() + lastNumber;
                     break;
-                case '-': expression = exp.Pop() - lastNumber; // изваждане
+                case '-': expression = exp.Pop() - lastNumber;
                     break;
                 default:
                     break;
@@ -55,10 +54,11 @@ namespace _7.CalculateExpression
             return expression;
         }
 
-        static Queue<char> ShuntingYard(string input) // Използва се алгоритъма Shunting Yard, като в опашка се вкарват числата и операторите
+        // Shunting Yard algorithm
+        static Queue<char> ShuntingYard(string input) 
         {
-            Queue<char> output = new Queue<char>(); // опашка
-            Stack<char> stack = new Stack<char>(); // стек за операторите
+            Queue<char> output = new Queue<char>();
+            Stack<char> operatorsStack = new Stack<char>();
             for (int i = 0; i < input.Length; i++)
             {
                 char symbol = input[i];
@@ -71,49 +71,50 @@ namespace _7.CalculateExpression
                     int preced = GetPrecedence(symbol);
                     if (preced > 0)
                     {
-                        if (stack.Count == 0 || GetPrecedence(stack.Peek()) < preced)
+                        if (operatorsStack.Count == 0 || GetPrecedence(operatorsStack.Peek()) < preced)
                         {
-                            stack.Push(symbol);
+                            operatorsStack.Push(symbol);
                             output.Enqueue(' ');
                         }
                         else
                         {
-                            while (stack.Count > 0 && preced <= GetPrecedence(stack.Peek()))
+                            while (operatorsStack.Count > 0 && preced <= GetPrecedence(operatorsStack.Peek()))
                             {
-                                output.Enqueue(stack.Pop());
+                                output.Enqueue(operatorsStack.Pop());
                             }
-                            stack.Push(symbol);
+                            operatorsStack.Push(symbol);
                         }
                     }
                     else
                     {
                         if (symbol == '(')
                         {
-                            stack.Push(symbol);
+                            operatorsStack.Push(symbol);
                         }
                         else if (symbol == ')')
                         {
-                            while (stack.Peek() != '(')
+                            while (operatorsStack.Peek() != '(')
                             {
-                                output.Enqueue(stack.Pop());
+                                output.Enqueue(operatorsStack.Pop());
                             }
-                            stack.Pop();
-                            if (stack.Count > 0 && Char.IsLetter(stack.Peek()))
+                            operatorsStack.Pop();
+                            if (operatorsStack.Count > 0 && Char.IsLetter(operatorsStack.Peek()))
                             {
-                                output.Enqueue(stack.Pop());
+                                output.Enqueue(operatorsStack.Pop());
                             }
                         }
                     }
                 }
             }
-            while (stack.Count > 0)
+            while (operatorsStack.Count > 0)
             {
-                output.Enqueue(stack.Pop());
+                output.Enqueue(operatorsStack.Pop());
             }
             return output;
         }
 
-        static Stack<double> PolishNotation(Queue<char> output) // Използва се алгоритъма Polish Notation, за да се извърши изчислението в готовата опашка
+        // Polish Notation algorithm - calculating expression in the output queue
+        static Stack<double> PolishNotation(Queue<char> output)
         {
             Stack<double> exp = new Stack<double>();
             while (output.Count > 0)
@@ -142,7 +143,8 @@ namespace _7.CalculateExpression
         static void Main(string[] args)
         {
             string input = "(3+5.3) * 2.7 - ln(22) / pow(2.2, -1.7)";
-            input = input.Replace(" ", "").Replace("(-", "(0-").Replace(",-", ",0-"); // добавя се 0, за да се избегнем проблема с отрицателните числа 
+            // add 0 to avoid the problem of negative numbers 
+            input = input.Replace(" ", "").Replace("(-", "(0-").Replace(",-", ",0-"); 
             Queue<char> output = new Queue<char>();
             output = ShuntingYard(input);
             double result = PolishNotation(output).Pop();
